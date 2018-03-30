@@ -5,7 +5,7 @@
 - Feature Printer -> _Pass_
 - Feature Smart Card Reader -> _Not Pass_ 
 >- (Get *some* data is not available)
-- Feature MSR -> _Not Test_
+- Feature MSR -> _Not Pass_
 
 ## NewBXLSDKv127Activity (Used lib bixolon_printer_v127.jar)
 - Feature Printer -> _Not Pass_
