@@ -205,7 +205,8 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Auto Off" />
+                android:text="Auto Off"
+                android:visibility="gone"/>
 
         </LinearLayout>
 
@@ -226,7 +227,8 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Read" />
+                android:text="Read"
+                android:enabled="false"/>
 
         </LinearLayout>
 

@@ -63,7 +63,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
 
     private EditText edtResult;
 
-    private String error;
+    private String messageResult;
 
     private Button btnConnect;
     private Button btnDisconnect;
@@ -189,19 +189,34 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                 .setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        messageResult = "";
+                        edtResult.setText("");
+
                         deviceNameSelect = list_name[which];
                         deviceAddressSelect = list_address[which];
-                        bluetoothSPP.connect(deviceAddressSelect);
+
                         btnConnect.setEnabled(false);
 
-                        saveBxlConfigLoader();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
 
-                        openAndSetup();
+                                bluetoothSPP.connect(deviceAddressSelect);
+
+                                // Method from this class
+                                saveBxlConfigLoader();
+
+                                // Method from this class
+                                openAndSetup();
+                            }
+                        }).start();
                     }
                 }).show();
     }
 
     private void saveBxlConfigLoader() {
+
         try {
             for (Object entry : bxlConfigLoader.getEntries()) {
                 JposEntry jposEntry = (JposEntry) entry;
@@ -209,6 +224,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            messageResult += "Error removeBxlConfigLoader : " + e.getMessage() + "\n";
         }
 
         try {
@@ -240,6 +256,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
             bxlConfigLoader.saveFile();
         } catch (Exception e) {
             e.printStackTrace();
+            messageResult += "Error saveBxlConfigLoader : " + e.getMessage() + "\n";
         }
     }
 
@@ -250,6 +267,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                     posPrinter.open(deviceNameSelect);
                     posPrinter.claim(0);
                     posPrinter.setDeviceEnabled(true);
+                    posPrinter.setAsyncMode(true);
                     break;
                 case R.id.rdoCardReader:
                     smartCardRW.open(deviceNameSelect);
@@ -268,9 +286,26 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                     msr.setDataEncryptionAlgorithm(MSRConst.MSR_DE_NONE);
                     break;
             }
-        } catch (JposException e1) {
+        } catch (final JposException e1) {
             e1.printStackTrace();
-            edtResult.setText("Error openAndSetup : " + e1.getMessage());
+            if (e1.getMessage().endsWith("Device Control already open")) {
+                messageResult += "Success : " + e1.getMessage();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        edtResult.setText(messageResult);
+                    }
+                });
+            } else {
+                messageResult += "Error openAndSetup : " + e1.getMessage();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        btnConnect.setEnabled(true);
+                        edtResult.setText(messageResult);
+                    }
+                });
+            }
         }
     }
 
@@ -294,56 +329,51 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
     }
 
     private void getTrackDataMsr() {
-        if (msr != null) {
-            try {
 
-                String msrResult = "";
+        if (msr != null) {
+            messageResult = "";
+            try {
 
                 byte[] track1 = msr.getTrack1Data();
                 byte[] track2 = msr.getTrack2Data();
                 byte[] track3 = msr.getTrack3Data();
 
-                msrResult += "track1 : " + EMCSUtility.getUTF8FromAsciiBytes(track1) + "\n";
-                msrResult += "track2 : " + EMCSUtility.getUTF8FromAsciiBytes(track2) + "\n";
-                msrResult += "track3 : " + EMCSUtility.getUTF8FromAsciiBytes(track3);
+                messageResult += "track1 : " + EMCSUtility.getUTF8FromAsciiBytes(track1) + "\n";
+                messageResult += "track2 : " + EMCSUtility.getUTF8FromAsciiBytes(track2) + "\n";
+                messageResult += "track3 : " + EMCSUtility.getUTF8FromAsciiBytes(track3);
 
-                edtResult.setText(msrResult);
 
-            } catch (JposException e6) {
+            } catch (JposException | StringIndexOutOfBoundsException e6) {
                 e6.printStackTrace();
-                edtResult.setText("Error getTrackDataMsr : " + e6.getMessage());
+                messageResult += "Error getTrackDataMsr : " + e6.getMessage() + "\n";
             }
         }
+
+        edtResult.setText(messageResult);
     }
 
     private void closeAll() {
 
-        error = "";
+        messageResult = "";
 
         switch (rdgMode.getCheckedRadioButtonId()) {
             case R.id.rdoPrinter:
                 // Method from this class
-                closeSmartCardRW();
-                // Method from this class
-                closeMsr();
+                closePrinter();
                 break;
 
             case R.id.rdoCardReader:
                 // Method from this class
-                closePrinter();
-                // Method from this class
-                closeMsr();
+                closeSmartCardRW();
                 break;
 
             case R.id.rdoMsr:
                 // Method from this class
-                closePrinter();
-                // Method from this class
-                closeSmartCardRW();
+                closeMsr();
                 break;
         }
 
-        edtResult.setText(error);
+        edtResult.setText(messageResult);
     }
 
     private void closePrinter() {
@@ -353,7 +383,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                 posPrinter.close();
             } catch (JposException e7) {
                 e7.printStackTrace();
-                error += "Error closePrinter : " + e7.getMessage() + "\n";
+                messageResult += "Error closePrinter : " + e7.getMessage() + "\n";
             }
         }
     }
@@ -365,7 +395,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                 smartCardRW.close();
             } catch (JposException e8) {
                 e8.printStackTrace();
-                error += "Error closeSmartCardRW : " + e8.getMessage() + "\n";
+                messageResult += "Error closeSmartCardRW : " + e8.getMessage() + "\n";
             }
         }
     }
@@ -378,7 +408,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                 msr.setDeviceEnabled(false);
             } catch (JposException e9) {
                 e9.printStackTrace();
-                error += "Error closeMsr : " + e9.getMessage() + "\n";
+                messageResult += "Error closeMsr : " + e9.getMessage() + "\n";
             }
         }
     }
@@ -429,7 +459,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
 
-            error = "";
+            messageResult = "";
 
             switch (group.getCheckedRadioButtonId()) {
                 case R.id.rdoPrinter:
@@ -437,6 +467,9 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                     closeSmartCardRW();
                     // Method from this class
                     closeMsr();
+
+                    btnRead.setEnabled(false);
+                    btnPrint.setEnabled(true);
                     break;
 
                 case R.id.rdoCardReader:
@@ -444,6 +477,10 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                     closePrinter();
                     // Method from this class
                     closeMsr();
+
+                    btnRead.setEnabled(true);
+                    btnPrint.setEnabled(false);
+
                     break;
 
                 case R.id.rdoMsr:
@@ -451,9 +488,13 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                     closePrinter();
                     // Method from this class
                     closeSmartCardRW();
+
+                    btnRead.setEnabled(true);
+                    btnPrint.setEnabled(false);
+
                     break;
             }
-            edtResult.setText(error);
+            edtResult.setText(messageResult);
         }
     };
 
@@ -515,7 +556,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
 
                     } catch (JposException e4) {
                         e4.printStackTrace();
-                        edtResult.setText("Error bitmapSelectedImage: " + e4.getMessage());
+                        edtResult.setText("Error btnPrint : " + e4.getMessage());
                     }
                 } else {
                     Toast.makeText(NewBXLSDKv127Activity.this, "not bitmap", Toast.LENGTH_LONG).show();

@@ -48,6 +48,7 @@ public class EMCSUtility {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+
         assert result != null;
         return result.substring(0, result.length() - 2);
     }
