@@ -11,7 +11,7 @@
 - Feature Printer -> _Not Pass_
 - Feature Smart Card Reader -> _Not Pass_ 
 >- (Get *all* data is not available)
-- Feature MSR -> _Not Test_
+- Feature MSR -> _Not Pass_
 
 ## Reference
 - ThaiNationalIDCard : https://github.com/chakphanu/ThaiNationalIDCard/blob/master/APDU.md
