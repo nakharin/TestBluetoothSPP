@@ -12,3 +12,7 @@
 - Feature Smart Card Reader -> _Not Pass_ 
 >- (Get *all* data is not available)
 - Feature MSR -> _Not Test_
+
+## Reference
+- ThaiNationalIDCard : https://github.com/chakphanu/ThaiNationalIDCard/blob/master/APDU.md
+- Android-BluetoothSPPLibrary : https://github.com/akexorcist/Android-BluetoothSPPLibrary
