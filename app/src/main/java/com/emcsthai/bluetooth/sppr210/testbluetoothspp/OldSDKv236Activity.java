@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,9 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bixolon.printer.BixolonPrinter;
-import com.bixolon.printer.utility.Utility;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.EMCSUtility;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.LoadingDialogHandler;
+import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.ThaiApdu;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -79,8 +78,10 @@ public class OldSDKv236Activity extends AppCompatActivity {
         assert bar != null;
         bar.setTitle("OldSDKv236Activity");
 
+        // Method from this class
         initWidget();
 
+        // Method from this class
         initAPDU();
 
         bluetoothSPP = new BluetoothSPP(this);
@@ -136,33 +137,20 @@ public class OldSDKv236Activity extends AppCompatActivity {
     }
 
     private void initAPDU() {
-        byte[] apduSelect = new byte[]{0x00, (byte) 0xA4, 0x04, 0x00, 0x08, (byte) 0xA0, 0x00, 0x00, 0x00, 0x54, 0x48, 0x00, 0x01};
-        byte[] apduCID = new byte[]{(byte) 0x80, (byte) 0xB0, 0x00, 0x04, 0x02, 0x00, 0x0D};
-        byte[] apduGetResponseCID = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x0D};
-        byte[] apduNameTH = new byte[]{(byte) 0x80, (byte) 0xB0, 0x00, 0x11, 0x02, 0x00, 0x64};
-        byte[] apduGetResponseNameTH = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x64};
-        byte[] apduNameEN = new byte[]{(byte) 0x80, (byte) 0xB0, 0x00, 0x75, 0x02, 0x00, 0x64};
-        byte[] apduGetResponseNameEN = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x64};
-        byte[] apduGendar = new byte[]{(byte) 0x80, (byte) 0xB0, 0x00, (byte) 0xE1, 0x20, 0x00, 0x01};
-        byte[] apduGetResponseGendar = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x01};
-        byte[] apduNameDateOfBirth = new byte[]{(byte) 0x80, (byte) 0xB0, 0x00, (byte) 0xD9, 0x02, 0x00, 0x08};
-        byte[] apduGetResponseDateOfBirth = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x08};
-        byte[] apduNameAddress = new byte[]{(byte) 0x80, (byte) 0xB0, 0x15, 0x79, 0x02, 0x00, 0x64};
-        byte[] apduGetResponseAddress = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x64};
 
-        apduCommand.put(0, apduSelect);
-        apduCommand.put(1, apduCID);
-        apduCommand.put(2, apduGetResponseCID);
-        apduCommand.put(3, apduNameTH);
-        apduCommand.put(4, apduGetResponseNameTH);
-        apduCommand.put(5, apduNameEN);
-        apduCommand.put(6, apduGetResponseNameEN);
-        apduCommand.put(7, apduGendar);
-        apduCommand.put(8, apduGetResponseGendar);
-        apduCommand.put(9, apduNameDateOfBirth);
-        apduCommand.put(10, apduGetResponseDateOfBirth);
-        apduCommand.put(11, apduNameAddress);
-        apduCommand.put(12, apduGetResponseAddress);
+        apduCommand.put(0, ThaiApdu.getSelect());
+        apduCommand.put(1, ThaiApdu.getCID());
+        apduCommand.put(2, ThaiApdu.getResponseCID());
+        apduCommand.put(3, ThaiApdu.getNameTH());
+        apduCommand.put(4, ThaiApdu.getResponseNameTH());
+        apduCommand.put(5, ThaiApdu.getNameEN());
+        apduCommand.put(6, ThaiApdu.getResponseNameEN());
+        apduCommand.put(7, ThaiApdu.getGender());
+        apduCommand.put(8, ThaiApdu.getResponseGender());
+        apduCommand.put(9, ThaiApdu.getDateOfBirth());
+        apduCommand.put(10, ThaiApdu.getResponseDateOfBirth());
+        apduCommand.put(11, ThaiApdu.getAddress());
+        apduCommand.put(12, ThaiApdu.getResponseAddress());
     }
 
     private void setup() {

@@ -22,6 +22,7 @@ import com.bixolon.printer.utility.Utility;
 import com.bxl.config.editor.BXLConfigLoader;
 import com.bxl.util.BXLUtility;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.EMCSUtility;
+import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.ThaiApdu;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -68,20 +69,6 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
     private Bitmap bitmapSelectedImage = null;
     private String deviceNameSelect = "";
     private String deviceAddressSelect = "";
-
-    byte[] apduSelect = new byte[]{0x00, (byte) 0xA4, 0x04, 0x00, 0x08, (byte) 0xA0, 0x00, 0x00, 0x00, 0x54, 0x48, 0x00, 0x01};
-    byte[] apduCID = new byte[]{(byte) 0x80, (byte) 0xB0, 0x00, 0x04, 0x02, 0x00, 0x0D};
-    byte[] apduGetResponseCID = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x0D};
-    byte[] apduNameTH = new byte[]{(byte) 0x80, (byte) 0xB0, 0x00, 0x11, 0x02, 0x00, 0x64};
-    byte[] apduGetResponseNameTH = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x64};
-    byte[] apduNameEN = new byte[]{(byte) 0x80, (byte) 0xB0, 0x00, 0x75, 0x02, 0x00, 0x64};
-    byte[] apduGetResponseNameEN = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x64};
-    byte[] apduGendar = new byte[]{(byte) 0x80, (byte) 0xB0, 0x00, (byte) 0xE1, 0x20, 0x00, 0x01};
-    byte[] apduGetResponseGendar = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x01};
-    byte[] apduNameDateOfBirth = new byte[]{(byte) 0x80, (byte) 0xB0, 0x00, (byte) 0xD9, 0x02, 0x00, 0x08};
-    byte[] apduGetResponseDateOfBirth = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x08};
-    byte[] apduNameAddress = new byte[]{(byte) 0x80, (byte) 0xB0, 0x15, 0x79, 0x02, 0x00, 0x64};
-    byte[] apduGetResponseAddress = new byte[]{0x00, (byte) 0xC0, 0x00, 0x00, 0x64};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -405,7 +392,9 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                     case R.id.rdoCardReader:
 
                         String[] data = new String[]{
-                                new String(apduSelect), new String(apduCID), new String(apduGetResponseCID)
+                                new String(ThaiApdu.getSelect()),
+                                new String(ThaiApdu.getCID()),
+                                new String(ThaiApdu.getResponseCID())
                         };
                         int[] count = new int[1];
 
