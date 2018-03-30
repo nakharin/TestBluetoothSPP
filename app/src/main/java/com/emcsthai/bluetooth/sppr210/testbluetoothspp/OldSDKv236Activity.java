@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -69,6 +72,15 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
     private int index = 0;
 
+    private static final String ACTION_GET_MSR_TRACK_DATA = "com.bixolon.anction.GET_MSR_TRACK_DATA";
+    private static final String EXTRA_NAME_MSR_TRACK_DATA = "MsrTrackData";
+
+    private byte[] mTrack1Data;
+    private byte[] mTrack2Data;
+    private byte[] mTrack3Data;
+
+    private String msrResult = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,6 +126,8 @@ public class OldSDKv236Activity extends AppCompatActivity {
         btnDisconnect.setOnClickListener(onClickListener);
         btnPrint.setOnClickListener(onClickListener);
         btnRead.setOnClickListener(onClickListener);
+
+        rdgMode.setOnCheckedChangeListener(onCheckedChangeListener);
     }
 
     private void initWidget() {
@@ -202,9 +216,14 @@ public class OldSDKv236Activity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        bluetoothSPP.stopService();
-        bixolonPrinter.disconnect();
         bitmapSelectedImage = null;
+        bluetoothSPP.stopService();
+        if (bixolonPrinter != null) {
+            if (rdgMode.getCheckedRadioButtonId() == R.id.rdoMsr) {
+                bixolonPrinter.cancelMsrReaderMode();
+            }
+            bixolonPrinter.disconnect();
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -275,24 +294,29 @@ public class OldSDKv236Activity extends AppCompatActivity {
                     return true;
 
                 case BixolonPrinter.MESSAGE_READ:
-                    if (msg.arg1 == BixolonPrinter.PROCESS_SMART_CARD_EXCHANGE_APDU) {
+                    switch (msg.arg1) {
+                        case BixolonPrinter.PROCESS_SMART_CARD_EXCHANGE_APDU:
+                            arrByte.add((byte[]) msg.obj);
 
-                        arrByte.add((byte[]) msg.obj);
+                            if (index < apduCommand.size() - 1) {
+                                index = index + 1;
+                                bixolonPrinter.exchangeApdu(apduCommand.get(index));
+                            } else {
+                                index = 0;
+                                bixolonPrinter.powerDownSmartCard();
+                                LoadingDialogHandler.getInstance().closeLoadingDialog();
+                                Toast.makeText(OldSDKv236Activity.this, "Read Completed", Toast.LENGTH_SHORT).show();
 
-                        if (index < apduCommand.size() - 1) {
-                            index = index + 1;
-                            bixolonPrinter.exchangeApdu(apduCommand.get(index));
-                        } else {
-                            index = 0;
-                            bixolonPrinter.powerDownSmartCard();
-                            LoadingDialogHandler.getInstance().closeLoadingDialog();
-                            Toast.makeText(OldSDKv236Activity.this, "Read Completed", Toast.LENGTH_SHORT).show();
+                                // Method from this class
+                                showResult();
+                            }
 
-                            // Method from this class
-                            showResult();
-                        }
+                            break;
+                        case BixolonPrinter.PROCESS_GET_MSR_MODE:
+                            // TODO: 30/3/2018 AD
+
+                            break;
                     }
-
                     return true;
 
                 case BixolonPrinter.MESSAGE_BLUETOOTH_DEVICE_SET:
@@ -305,6 +329,53 @@ public class OldSDKv236Activity extends AppCompatActivity {
             return false;
         }
     });
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ACTION_GET_MSR_TRACK_DATA)) {
+                Bundle bundle = intent.getBundleExtra(EXTRA_NAME_MSR_TRACK_DATA);
+
+                edtResult.setText("");
+
+                mTrack1Data = bundle.getByteArray(BixolonPrinter.KEY_STRING_MSR_TRACK1);
+                if (mTrack1Data != null) {
+                    new Handler().postDelayed(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            msrResult += EMCSUtility.GetUTF8FromAsciiBytes(mTrack1Data) + "\n";
+                        }
+                    }, 100);
+                }
+
+                mTrack2Data = bundle.getByteArray(BixolonPrinter.KEY_STRING_MSR_TRACK2);
+                if (mTrack2Data != null) {
+                    new Handler().postDelayed(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            msrResult += EMCSUtility.GetUTF8FromAsciiBytes(mTrack2Data) + "\n";
+                        }
+                    }, 100);
+                }
+
+                mTrack3Data = bundle.getByteArray(BixolonPrinter.KEY_STRING_MSR_TRACK3);
+                if (mTrack3Data != null) {
+                    new Handler().postDelayed(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            msrResult += EMCSUtility.GetUTF8FromAsciiBytes(mTrack3Data);
+                        }
+                    }, 100);
+                }
+
+                edtResult.setText(msrResult);
+            }
+        }
+    };
 
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -375,6 +446,24 @@ public class OldSDKv236Activity extends AppCompatActivity {
                         bixolonPrinter.exchangeApdu(apduCommand.get(0));
                     }
                 }).start();
+            }
+        }
+    };
+
+    private final RadioGroup.OnCheckedChangeListener onCheckedChangeListener = new RadioGroup.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+            switch (group.getCheckedRadioButtonId()) {
+                case R.id.rdoCardReader:
+                    bixolonPrinter.cancelMsrReaderMode();
+                    break;
+                case R.id.rdoMsr:
+                    bixolonPrinter.setMsrReaderMode();
+                    IntentFilter filter = new IntentFilter();
+                    filter.addAction(ACTION_GET_MSR_TRACK_DATA);
+                    registerReceiver(mReceiver, filter);
+                    break;
             }
         }
     };
