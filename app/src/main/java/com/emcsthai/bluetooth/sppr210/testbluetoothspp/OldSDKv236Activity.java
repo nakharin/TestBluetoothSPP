@@ -207,6 +207,8 @@ public class OldSDKv236Activity extends AppCompatActivity {
         for (byte[] bytes : arrByte) {
             if (bytes != null) {
                 message += EMCSUtility.getUTF8FromAsciiBytes(bytes) + "\n";
+            } else {
+                message += "null \n";
             }
         }
 
