@@ -32,11 +32,14 @@ import app.akexorcist.bluetotohspp.library.BluetoothSPP;
 import app.akexorcist.bluetotohspp.library.BluetoothState;
 import jpos.JposException;
 import jpos.MSR;
+import jpos.MSRConst;
 import jpos.POSPrinter;
 import jpos.POSPrinterConst;
 import jpos.SmartCardRW;
 import jpos.SmartCardRWConst;
 import jpos.config.JposEntry;
+import jpos.events.DataEvent;
+import jpos.events.DataListener;
 
 public class NewBXLSDKv127Activity extends AppCompatActivity {
 
@@ -115,6 +118,8 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
         btnAutoConnect.setOnClickListener(onClickListener);
         btnPrint.setOnClickListener(onClickListener);
         btnRead.setOnClickListener(onClickListener);
+
+        rdgMode.setOnCheckedChangeListener(onCheckedChangeListener);
     }
 
     private void initWidget() {
@@ -189,7 +194,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
 
                         saveBxlConfigLoader();
 
-                        openPrinter();
+                        openAndSetup();
                     }
                 }).show();
     }
@@ -236,7 +241,7 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
         }
     }
 
-    private void openPrinter() {
+    private void openAndSetup() {
         try {
             switch (rdgMode.getCheckedRadioButtonId()) {
                 case R.id.rdoPrinter:
@@ -255,6 +260,10 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                     msr.open(deviceNameSelect);
                     msr.claim(0);
                     msr.setDeviceEnabled(true);
+                    msr.setAutoDisable(false);
+                    msr.addDataListener(dataListener);
+                    msr.setDataEventEnabled(true);
+                    msr.setDataEncryptionAlgorithm(MSRConst.MSR_DE_NONE);
                     break;
             }
         } catch (JposException e1) {
@@ -263,27 +272,114 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        bluetoothSPP.stopService();
-        bitmapSelectedImage = null;
+    private void getDataSmartCard() {
+        if (smartCardRW != null) {
+            String[] data = new String[]{
+                    new String(ThaiApdu.getSelect()),
+                    new String(ThaiApdu.getCID()),
+                    new String(ThaiApdu.getResponseCID())
+            };
+            int[] count = new int[1];
+
+            try {
+                smartCardRW.readData(SmartCardRWConst.SC_READ_DATA, count, data);
+                edtResult.setText("Hex : " + BXLUtility.toHexString(data[0].getBytes()));
+            } catch (JposException e5) {
+                e5.printStackTrace();
+                edtResult.setText("Error e5: " + e5.getMessage());
+            }
+        }
+    }
+
+    private void getTrackDataMsr() {
+        if (msr != null) {
+            try {
+
+                String msrResult = "";
+
+                byte[] track1 = msr.getTrack1Data();
+                byte[] track2 = msr.getTrack2Data();
+                byte[] track3 = msr.getTrack3Data();
+
+                msrResult += "track1 : " + EMCSUtility.getUTF8FromAsciiBytes(track1) + "\n";
+                msrResult += "track2 : " + EMCSUtility.getUTF8FromAsciiBytes(track2) + "\n";
+                msrResult += "track3 : " + EMCSUtility.getUTF8FromAsciiBytes(track3);
+
+                edtResult.setText(msrResult);
+
+            } catch (JposException e6) {
+                e6.printStackTrace();
+                edtResult.setText("Error e6: " + e6.getMessage());
+            }
+        }
+    }
+
+    private void closeAll() {
         try {
             switch (rdgMode.getCheckedRadioButtonId()) {
                 case R.id.rdoPrinter:
+                    posPrinter.release();
                     posPrinter.close();
                     break;
                 case R.id.rdoCardReader:
+                    smartCardRW.release();
                     smartCardRW.close();
                     break;
                 case R.id.rdoMsr:
+                    msr.release();
                     msr.close();
+                    msr.setDeviceEnabled(false);
                     break;
             }
         } catch (JposException e2) {
             e2.printStackTrace();
             Toast.makeText(this, "Error e2 : " + e2.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void closePrinter() {
+        if (posPrinter != null) {
+            try {
+                posPrinter.release();
+                posPrinter.close();
+            } catch (JposException e7) {
+                e7.printStackTrace();
+                edtResult.setText("Error e7 : " + e7.getMessage());
+            }
+        }
+    }
+
+    private void closeSmartCardRW() {
+        if (smartCardRW != null) {
+            try {
+                smartCardRW.release();
+                smartCardRW.close();
+            } catch (JposException e8) {
+                e8.printStackTrace();
+                edtResult.setText("Error e8 : " + e8.getMessage());
+            }
+        }
+    }
+
+    private void closeMsr() {
+        if (msr != null) {
+            try {
+                msr.release();
+                msr.close();
+            } catch (JposException e9) {
+                e9.printStackTrace();
+                edtResult.setText("Error e9 : " + e9.getMessage());
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bluetoothSPP.stopService();
+        bitmapSelectedImage = null;
+        // Method from this class
+        closeAll();
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -318,6 +414,32 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
                 break;
         }
     }
+
+    RadioGroup.OnCheckedChangeListener onCheckedChangeListener = new RadioGroup.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+            switch (group.getCheckedRadioButtonId()) {
+                case R.id.rdoPrinter:
+                    // Method from this class
+                    closeSmartCardRW();
+                    // Method from this class
+                    closeMsr();
+                    break;
+                case R.id.rdoCardReader:
+                    // Method from this class
+                    closePrinter();
+                    // Method from this class
+                    closeMsr();
+                    break;
+                case R.id.rdoMsr:
+                    // Method from this class
+                    closePrinter();
+                    // Method from this class
+                    closeSmartCardRW();
+                    break;
+            }
+        }
+    };
 
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
@@ -390,27 +512,23 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
             if (v == btnRead) {
                 switch (rdgMode.getCheckedRadioButtonId()) {
                     case R.id.rdoCardReader:
-
-                        String[] data = new String[]{
-                                new String(ThaiApdu.getSelect()),
-                                new String(ThaiApdu.getCID()),
-                                new String(ThaiApdu.getResponseCID())
-                        };
-                        int[] count = new int[1];
-
-                        try {
-                            smartCardRW.readData(SmartCardRWConst.SC_READ_DATA, count, data);
-                            edtResult.setText("Hex : " + BXLUtility.toHexString(data[0].getBytes()));
-                        } catch (JposException e5) {
-                            e5.printStackTrace();
-                            edtResult.setText("Error e5: " + e5.getMessage());
-                        }
-
+                        // Method from this class
+                        getDataSmartCard();
                         break;
                     case R.id.rdoMsr:
+                        // Method from this class
+                        getTrackDataMsr();
                         break;
                 }
             }
+        }
+    };
+
+    private final DataListener dataListener = new DataListener() {
+        @Override
+        public void dataOccurred(DataEvent dataEvent) {
+            // Method from this class
+            getTrackDataMsr();
         }
     };
 

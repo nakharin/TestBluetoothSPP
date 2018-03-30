@@ -27,7 +27,7 @@ public class EMCSUtility {
         return bmpGrayScale;
     }
 
-    public static String GetUTF8FromAsciiBytes(byte[] ascii_bytes) {
+    public static String getUTF8FromAsciiBytes(byte[] ascii_bytes) {
         String ascii = null;
         try {
             ascii = new String(ascii_bytes, "TIS620");

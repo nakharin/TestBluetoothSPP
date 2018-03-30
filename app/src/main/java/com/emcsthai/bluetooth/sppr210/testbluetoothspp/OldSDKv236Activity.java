@@ -206,7 +206,7 @@ public class OldSDKv236Activity extends AppCompatActivity {
         String message = "";
         for (byte[] bytes : arrByte) {
             if (bytes != null) {
-                message += EMCSUtility.GetUTF8FromAsciiBytes(bytes) + "\n";
+                message += EMCSUtility.getUTF8FromAsciiBytes(bytes) + "\n";
             }
         }
 
@@ -345,7 +345,7 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
                         @Override
                         public void run() {
-                            msrResult += EMCSUtility.GetUTF8FromAsciiBytes(mTrack1Data) + "\n";
+                            msrResult += EMCSUtility.getUTF8FromAsciiBytes(mTrack1Data) + "\n";
                         }
                     }, 100);
                 }
@@ -356,7 +356,7 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
                         @Override
                         public void run() {
-                            msrResult += EMCSUtility.GetUTF8FromAsciiBytes(mTrack2Data) + "\n";
+                            msrResult += EMCSUtility.getUTF8FromAsciiBytes(mTrack2Data) + "\n";
                         }
                     }, 100);
                 }
@@ -367,7 +367,7 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
                         @Override
                         public void run() {
-                            msrResult += EMCSUtility.GetUTF8FromAsciiBytes(mTrack3Data);
+                            msrResult += EMCSUtility.getUTF8FromAsciiBytes(mTrack3Data);
                         }
                     }, 100);
                 }
