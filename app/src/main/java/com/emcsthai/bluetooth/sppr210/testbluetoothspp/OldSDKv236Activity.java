@@ -156,11 +156,12 @@ public class OldSDKv236Activity extends AppCompatActivity {
     private void initAPDU() {
         apduCommand.put(0, ThaiApdu.getSelect());
         apduCommand.put(1, ThaiApdu.getCitizenID());
-        apduCommand.put(2, ThaiApdu.getNameTH());
-        apduCommand.put(3, ThaiApdu.getNameEN());
-        apduCommand.put(4, ThaiApdu.getDateOfBirth());
-        apduCommand.put(5, ThaiApdu.getGender());
-        apduCommand.put(6, ThaiApdu.getAddress());
+        apduCommand.put(2, ThaiApdu.getResponseCitizenID());
+        apduCommand.put(3, ThaiApdu.getPersonInfo());
+        apduCommand.put(4, ThaiApdu.getResponsePersonInfo());
+        apduCommand.put(5, ThaiApdu.getAddress());
+        apduCommand.put(6, ThaiApdu.getResponseAddress());
+        apduCommand.put(7, ThaiApdu.getResponseAddress());
     }
 
     private void setup() {
@@ -200,14 +201,10 @@ public class OldSDKv236Activity extends AppCompatActivity {
     private void showResult() {
 
         String message = "";
-
+        arrByte.remove(0);
         for (int i = 0; i < arrByte.size(); i++) {
             byte[] bytes = arrByte.get(i);
-            if (bytes != null && bytes.length != 0) {
-                message += i + " : " + EMCSUtility.getUTF8FromAsciiBytes(bytes) + "\n";
-            } else {
-                message += i + " : null \n";
-            }
+            message += i + " : " + EMCSUtility.getUTF8FromAsciiBytes(bytes) + "\n";
         }
 
         edtResult.setText(message);
@@ -297,40 +294,30 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
                     switch (msg.arg1) {
                         case BixolonPrinter.PROCESS_SMART_CARD_EXCHANGE_APDU:
-                            if (msg.arg2 == BixolonPrinter.SMART_CARD_STATUS_CODE_COMMAND_SUCCESSFUL) {
-
-                                byte[] bytes = (byte[]) msg.obj;
-
-                                if (bytes.length == 2) {
-                                    byte b = bytes[1];
-                                    byte[] getResponse = new byte[]{0x00, (byte) 0xc0, 0x00, 0x00, b};
-                                    bixolonPrinter.exchangeApdu(getResponse);
-                                } else {
-
+                            byte[] b = (byte[]) msg.obj;
+                            if (b != null) {
+                                if (b.length > 5) {
                                     arrByte.add((byte[]) msg.obj);
-                                    if (index < apduCommand.size() - 1) {
-                                        index = index + 1;
-                                        bixolonPrinter.exchangeApdu(apduCommand.get(index));
-
-                                    } else {
-                                        index = 0;
-                                        LoadingDialogHandler.getInstance().closeLoadingDialog();
-                                        Toast.makeText(OldSDKv236Activity.this, "Read Completed", Toast.LENGTH_SHORT).show();
-
-                                        // Method from this class
-                                        showResult();
-
-                                        bixolonPrinter.powerDownSmartCard();
-                                    }
                                 }
+                                if (index < apduCommand.size() - 1) {
+                                    index = index + 1;
+                                    bixolonPrinter.exchangeApdu(apduCommand.get(index));
+
+                                } else {
+                                    index = 0;
+                                    LoadingDialogHandler.getInstance().closeLoadingDialog();
+                                    Toast.makeText(OldSDKv236Activity.this, "Read Completed", Toast.LENGTH_SHORT).show();
+                                    // Method from this class
+                                    showResult();
+                                    bixolonPrinter.powerDownSmartCard();
+                                }
+
                             } else {
                                 index = 0;
                                 LoadingDialogHandler.getInstance().closeLoadingDialog();
                                 Toast.makeText(OldSDKv236Activity.this, "Read Failed", Toast.LENGTH_SHORT).show();
-
                                 // Method from this class
                                 showResult();
-
                                 bixolonPrinter.powerDownSmartCard();
                             }
                             break;
