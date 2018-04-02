@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +26,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bixolon.printer.BixolonPrinter;
+import com.bixolon.printer.utility.Command;
+import com.bixolon.printer.utility.Utility;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.EMCSUtility;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.LoadingDialogHandler;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.ThaiApdu;
@@ -151,20 +154,13 @@ public class OldSDKv236Activity extends AppCompatActivity {
     }
 
     private void initAPDU() {
-
         apduCommand.put(0, ThaiApdu.getSelect());
-        apduCommand.put(1, ThaiApdu.getCID());
-        apduCommand.put(2, ThaiApdu.getResponseCID());
-        apduCommand.put(3, ThaiApdu.getNameTH());
-        apduCommand.put(4, ThaiApdu.getResponseNameTH());
-        apduCommand.put(5, ThaiApdu.getNameEN());
-        apduCommand.put(6, ThaiApdu.getResponseNameEN());
-        apduCommand.put(7, ThaiApdu.getGender());
-        apduCommand.put(8, ThaiApdu.getResponseGender());
-        apduCommand.put(9, ThaiApdu.getDateOfBirth());
-        apduCommand.put(10, ThaiApdu.getResponseDateOfBirth());
-        apduCommand.put(11, ThaiApdu.getAddress());
-        apduCommand.put(12, ThaiApdu.getResponseAddress());
+        apduCommand.put(1, ThaiApdu.getCitizenID());
+        apduCommand.put(2, ThaiApdu.getNameTH());
+        apduCommand.put(3, ThaiApdu.getNameEN());
+        apduCommand.put(4, ThaiApdu.getDateOfBirth());
+        apduCommand.put(5, ThaiApdu.getGender());
+        apduCommand.put(6, ThaiApdu.getAddress());
     }
 
     private void setup() {
@@ -204,11 +200,13 @@ public class OldSDKv236Activity extends AppCompatActivity {
     private void showResult() {
 
         String message = "";
-        for (byte[] bytes : arrByte) {
-            if (bytes != null) {
-                message += EMCSUtility.getUTF8FromAsciiBytes(bytes) + "\n";
+
+        for (int i = 0; i < arrByte.size(); i++) {
+            byte[] bytes = arrByte.get(i);
+            if (bytes != null && bytes.length != 0) {
+                message += i + " : " + EMCSUtility.getUTF8FromAsciiBytes(bytes) + "\n";
             } else {
-                message += "null \n";
+                message += i + " : null \n";
             }
         }
 
@@ -296,27 +294,49 @@ public class OldSDKv236Activity extends AppCompatActivity {
                     return true;
 
                 case BixolonPrinter.MESSAGE_READ:
+
                     switch (msg.arg1) {
                         case BixolonPrinter.PROCESS_SMART_CARD_EXCHANGE_APDU:
-                            arrByte.add((byte[]) msg.obj);
+                            if (msg.arg2 == BixolonPrinter.SMART_CARD_STATUS_CODE_COMMAND_SUCCESSFUL) {
 
-                            if (index < apduCommand.size() - 1) {
-                                index = index + 1;
-                                bixolonPrinter.exchangeApdu(apduCommand.get(index));
+                                byte[] bytes = (byte[]) msg.obj;
+
+                                if (bytes.length == 2) {
+                                    byte b = bytes[1];
+                                    byte[] getResponse = new byte[]{0x00, (byte) 0xc0, 0x00, 0x00, b};
+                                    bixolonPrinter.exchangeApdu(getResponse);
+                                } else {
+
+                                    arrByte.add((byte[]) msg.obj);
+                                    if (index < apduCommand.size() - 1) {
+                                        index = index + 1;
+                                        bixolonPrinter.exchangeApdu(apduCommand.get(index));
+
+                                    } else {
+                                        index = 0;
+                                        LoadingDialogHandler.getInstance().closeLoadingDialog();
+                                        Toast.makeText(OldSDKv236Activity.this, "Read Completed", Toast.LENGTH_SHORT).show();
+
+                                        // Method from this class
+                                        showResult();
+
+                                        bixolonPrinter.powerDownSmartCard();
+                                    }
+                                }
                             } else {
                                 index = 0;
-                                bixolonPrinter.powerDownSmartCard();
                                 LoadingDialogHandler.getInstance().closeLoadingDialog();
-                                Toast.makeText(OldSDKv236Activity.this, "Read Completed", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(OldSDKv236Activity.this, "Read Failed", Toast.LENGTH_SHORT).show();
 
                                 // Method from this class
                                 showResult();
+
+                                bixolonPrinter.powerDownSmartCard();
                             }
-
                             break;
-                        case BixolonPrinter.PROCESS_GET_MSR_MODE:
-                            // TODO: 30/3/2018 AD
 
+                        case BixolonPrinter.PROCESS_GET_MSR_MODE:
+                            // TODO: 2/4/2018 AD
                             break;
                     }
                     return true;

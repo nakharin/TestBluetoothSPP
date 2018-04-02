@@ -313,8 +313,8 @@ public class NewBXLSDKv127Activity extends AppCompatActivity {
         if (smartCardRW != null) {
             String[] data = new String[]{
                     new String(ThaiApdu.getSelect()),
-                    new String(ThaiApdu.getCID()),
-                    new String(ThaiApdu.getResponseCID())
+                    new String(ThaiApdu.getCitizenID()),
+                    new String(ThaiApdu.getResponseCitizenID())
             };
             int[] count = new int[1];
 
