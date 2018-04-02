@@ -26,13 +26,11 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
-    compile 'com.akexorcist:bluetoothspp:1.0.0'
+    implementation 'com.akexorcist:bluetoothspp:1.0.0'
 
-    compile files('libs/BixolonPrinterV236.jar')
-
-    compile files('libs/BixolonPrinterV236.jar')
-    compile files('libs/bixolon_printer_v127.jar')
-    compile files('libs/icu4j-58_1.jar')
-    compile files('libs/jpos117-controls.jar')
-    compile files('libs/xerces.jar')
+    implementation files('libs/BixolonPrinterV236.jar')
+    implementation files('libs/bixolon_printer_v127.jar')
+    implementation files('libs/icu4j-58_1.jar')
+    implementation files('libs/jpos117-controls.jar')
+    implementation files('libs/xerces.jar')
 }
