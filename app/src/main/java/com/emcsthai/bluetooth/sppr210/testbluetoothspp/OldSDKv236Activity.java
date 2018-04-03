@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,6 +56,7 @@ public class OldSDKv236Activity extends AppCompatActivity {
     private TextView txtDeviceDetail;
 
     private RadioGroup rdgMode;
+    private TextView txtMsrMode;
 
     private Button btnOpenFromDeviceStorage;
 
@@ -77,16 +79,14 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
     private int index = 0;
 
-    private static final String ACTION_GET_MSR_TRACK_DATA = "com.bixolon.anction.GET_MSR_TRACK_DATA";
-    private static final String EXTRA_NAME_MSR_TRACK_DATA = "MsrTrackData";
+    static final String ACTION_GET_MSR_TRACK_DATA = "com.bixolon.anction.GET_MSR_TRACK_DATA";
+    static final String EXTRA_NAME_MSR_TRACK_DATA = "MsrTrackData";
 
     private byte[] mTrack1Data;
     private byte[] mTrack2Data;
     private byte[] mTrack3Data;
 
     private String msrResult = "";
-
-    private Personal personal = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +145,8 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
         rdgMode = findViewById(R.id.rdgMode);
 
+        txtMsrMode = findViewById(R.id.txtMsrMode);
+
         btnOpenFromDeviceStorage = findViewById(R.id.btnOpenFromDeviceStorage);
 
         imgClaimFrom = findViewById(R.id.imgClaimFrom);
@@ -172,6 +174,7 @@ public class OldSDKv236Activity extends AppCompatActivity {
         if (!bluetoothSPP.isServiceAvailable()) {
             bluetoothSPP.setupService();
             bluetoothSPP.startService(BluetoothState.DEVICE_OTHER);
+            bluetoothSPP.setOnDataReceivedListener(onDataReceivedListener);
         } else {
             txtIsConnect.setText("Service is not available.");
             txtIsConnect.setTextColor(getResources().getColor(R.color.colorRed));
@@ -210,7 +213,7 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
         String message = "";
         String log = "";
-        personal = new Personal();
+        Personal personal = new Personal();
 
         for (int i = 1; i < arrByte.size(); i++) {
             byte[] bytes = arrByte.get(i);
@@ -227,7 +230,7 @@ public class OldSDKv236Activity extends AppCompatActivity {
         }
 
         message += "คำนำหน้า : " + personal.getTitleTH() + " (" + personal.getTitleEN() + ")\n";
-        message += "ขื่อ-นามสกุล : " + personal.getNameTH() + " " + personal.getLastNameTH() + " (" + personal.getNameEN() + " " + personal.getLastNameEN() +")\n";
+        message += "ขื่อ-นามสกุล : " + personal.getNameTH() + " " + personal.getLastNameTH() + " (" + personal.getNameEN() + " " + personal.getLastNameEN() + ")\n";
         message += "วันเดือนปีเกิด : " + personal.getDateOfBirth() + "\n";
         message += "เพศ : " + personal.getSexNameTH() + "\n";
         message += "อายุ : " + personal.getAge() + "\n";
@@ -241,8 +244,6 @@ public class OldSDKv236Activity extends AppCompatActivity {
         Log.i(TAG, "showResult : " + log);
 
         edtResult.setText(message);
-
-
     }
 
     @Override
@@ -251,10 +252,15 @@ public class OldSDKv236Activity extends AppCompatActivity {
         bitmapSelectedImage = null;
         bluetoothSPP.stopService();
         if (bixolonPrinter != null) {
+            bixolonPrinter.disconnect();
             if (rdgMode.getCheckedRadioButtonId() == R.id.rdoMsr) {
                 bixolonPrinter.cancelMsrReaderMode();
+                try {
+                    unregisterReceiver(broadcastReceiver);
+                } catch (Exception e) {
+                    Log.e(TAG, "unregisterReceiver : " + e.getMessage());
+                }
             }
-            bixolonPrinter.disconnect();
         }
     }
 
@@ -291,6 +297,13 @@ public class OldSDKv236Activity extends AppCompatActivity {
         }
     }
 
+    private final BluetoothSPP.OnDataReceivedListener onDataReceivedListener = new BluetoothSPP.OnDataReceivedListener() {
+        @Override
+        public void onDataReceived(byte[] data, String message) {
+            Toast.makeText(OldSDKv236Activity.this, "Hex : " + Utility.toHexString(data) + " message : " + message, Toast.LENGTH_SHORT).show();
+        }
+    };
+
     private final Handler handler = new Handler(new Handler.Callback() {
 
         @Override
@@ -326,7 +339,13 @@ public class OldSDKv236Activity extends AppCompatActivity {
                     return true;
 
                 case BixolonPrinter.MESSAGE_READ:
-                    Log.i(TAG, "handleMessage : what : " + msg.what + " ,arg1 : " + msg.arg1 + " ,arg2 : " + msg.arg2 + " , obj : " + Utility.toHexString((byte[]) msg.obj));
+                    Log.i(TAG, "handleMessage : what = " + msg.what + " ,arg1 = " + msg.arg1 + " ,arg2 = " + msg.arg2);
+                    try {
+                        Log.i(TAG, "handleMessage : obj = " + Utility.toHexString((byte[]) msg.obj));
+                    } catch (Exception e) {
+                        Log.w(TAG, "handleMessage : ogj = " + e.getMessage());
+                    }
+
                     switch (msg.arg1) {
                         case BixolonPrinter.PROCESS_SMART_CARD_EXCHANGE_APDU:
 
@@ -359,7 +378,42 @@ public class OldSDKv236Activity extends AppCompatActivity {
                             break;
 
                         case BixolonPrinter.PROCESS_GET_MSR_MODE:
-                            // TODO: 2/4/2018 AD
+                            txtMsrMode.setVisibility(View.VISIBLE);
+                            switch (msg.arg2) {
+                                case BixolonPrinter.MSR_MODE_TRACK123_COMMAND:
+                                    txtMsrMode.setText("Track 1/2/3 read mode command");
+                                    bixolonPrinter.setMsrReaderMode();
+                                    break;
+                                case BixolonPrinter.MSR_MODE_TRACK1_AUTO:
+                                    txtMsrMode.setText("Track 1 read mode auto trigger");
+                                    break;
+                                case BixolonPrinter.MSR_MODE_TRACK2_AUTO:
+                                    txtMsrMode.setText("Track 2 read mode auto trigger");
+                                    break;
+                                case BixolonPrinter.MSR_MODE_TRACK3_AUTO:
+                                    txtMsrMode.setText("Track 3 read mode auto trigger");
+                                    break;
+                                case BixolonPrinter.MSR_MODE_TRACK12_AUTO:
+                                    txtMsrMode.setText("Track 1/2 read mode auto trigger");
+                                    break;
+                                case BixolonPrinter.MSR_MODE_TRACK23_AUTO:
+                                    txtMsrMode.setText("Track 2/3 read mode auto trigger");
+                                    break;
+                                case BixolonPrinter.MSR_MODE_TRACK123_AUTO:
+                                    txtMsrMode.setText("Track 1/2/3 read mode auto trigger");
+                                    break;
+                                case BixolonPrinter.MSR_MODE_NOT_USED:
+                                default:
+                                    txtMsrMode.setText("MSR not used");
+                                    break;
+                            }
+                            break;
+
+                        case BixolonPrinter.PROCESS_MSR_TRACK:
+                            Intent intent = new Intent();
+                            intent.setAction(ACTION_GET_MSR_TRACK_DATA);
+                            intent.putExtra(EXTRA_NAME_MSR_TRACK_DATA, msg.getData());
+                            sendBroadcast(intent);
                             break;
                     }
                     return true;
@@ -375,50 +429,48 @@ public class OldSDKv236Activity extends AppCompatActivity {
         }
     });
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(ACTION_GET_MSR_TRACK_DATA)) {
-                Bundle bundle = intent.getBundleExtra(EXTRA_NAME_MSR_TRACK_DATA);
+            Bundle bundle = intent.getBundleExtra(EXTRA_NAME_MSR_TRACK_DATA);
 
-                edtResult.setText("");
+            edtResult.setText("");
 
-                mTrack1Data = bundle.getByteArray(BixolonPrinter.KEY_STRING_MSR_TRACK1);
-                if (mTrack1Data != null) {
-                    new Handler().postDelayed(new Runnable() {
+            mTrack1Data = bundle.getByteArray(BixolonPrinter.KEY_STRING_MSR_TRACK1);
+            if (mTrack1Data != null) {
+                new Handler().postDelayed(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            msrResult += EMCSUtility.getUTF8FromAsciiBytes(mTrack1Data) + "\n";
-                        }
-                    }, 100);
-                }
-
-                mTrack2Data = bundle.getByteArray(BixolonPrinter.KEY_STRING_MSR_TRACK2);
-                if (mTrack2Data != null) {
-                    new Handler().postDelayed(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            msrResult += EMCSUtility.getUTF8FromAsciiBytes(mTrack2Data) + "\n";
-                        }
-                    }, 100);
-                }
-
-                mTrack3Data = bundle.getByteArray(BixolonPrinter.KEY_STRING_MSR_TRACK3);
-                if (mTrack3Data != null) {
-                    new Handler().postDelayed(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            msrResult += EMCSUtility.getUTF8FromAsciiBytes(mTrack3Data);
-                        }
-                    }, 100);
-                }
-
-                edtResult.setText(msrResult);
+                    @Override
+                    public void run() {
+                        msrResult += EMCSUtility.getUTF8FromAsciiBytes(mTrack1Data) + "\n";
+                    }
+                }, 100);
             }
+
+            mTrack2Data = bundle.getByteArray(BixolonPrinter.KEY_STRING_MSR_TRACK2);
+            if (mTrack2Data != null) {
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        msrResult += EMCSUtility.getUTF8FromAsciiBytes(mTrack2Data) + "\n";
+                    }
+                }, 100);
+            }
+
+            mTrack3Data = bundle.getByteArray(BixolonPrinter.KEY_STRING_MSR_TRACK3);
+            if (mTrack3Data != null) {
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        msrResult += EMCSUtility.getUTF8FromAsciiBytes(mTrack3Data);
+                    }
+                }, 100);
+            }
+
+            edtResult.setText(msrResult);
         }
     };
 
@@ -479,18 +531,27 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
             if (v == btnRead) {
 
-                arrByte.clear();
-                bixolonPrinter.powerUpSmartCard();
+                switch (rdgMode.getCheckedRadioButtonId()) {
+                    case R.id.rdoCardReader:
+                        arrByte.clear();
+                        bixolonPrinter.powerUpSmartCard();
 
-                LoadingDialogHandler.getInstance().showLoadingDialog(v.getContext(), "",
-                        "Printing, Please wait...");
+                        LoadingDialogHandler.getInstance().showLoadingDialog(v.getContext(), "",
+                                "Printing, Please wait...");
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        bixolonPrinter.exchangeApdu(apduCommand.get(0));
-                    }
-                }).start();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                bixolonPrinter.exchangeApdu(apduCommand.get(0));
+                            }
+                        }).start();
+                        break;
+                    case R.id.rdoMsr:
+                        IntentFilter filter = new IntentFilter();
+                        filter.addAction(ACTION_GET_MSR_TRACK_DATA);
+                        registerReceiver(broadcastReceiver, filter);
+                        break;
+                }
             }
         }
     };
@@ -501,13 +562,12 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
             switch (group.getCheckedRadioButtonId()) {
                 case R.id.rdoCardReader:
+                    txtMsrMode.setText("");
+                    txtMsrMode.setVisibility(View.GONE);
                     bixolonPrinter.cancelMsrReaderMode();
                     break;
                 case R.id.rdoMsr:
-                    bixolonPrinter.setMsrReaderMode();
-                    IntentFilter filter = new IntentFilter();
-                    filter.addAction(ACTION_GET_MSR_TRACK_DATA);
-                    registerReceiver(mReceiver, filter);
+                    bixolonPrinter.getMsrMode();
                     break;
             }
         }

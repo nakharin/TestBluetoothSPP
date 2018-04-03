@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,98 +9,98 @@
         android:id="@+id/linearTop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_margin="16dp">
+        android:layout_margin="16dp"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Bluetooth : "
                 android:textColor="@color/colorBlack"
-                android:textStyle="bold"
                 android:textSize="@dimen/textSizeSubject"
-                android:text="Bluetooth : "/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/txtIsBluetooth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Off"
                 android:textColor="@color/colorRed"
-                android:textStyle="bold"
                 android:textSize="@dimen/textSizeSubject"
-                android:text="Off"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Status : "
                 android:textColor="@color/colorBlack"
-                android:textStyle="bold"
                 android:textSize="@dimen/textSizeSubject"
-                android:text="Status : "/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/txtIsConnect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Disconnect"
                 android:textColor="@color/colorRed"
-                android:textStyle="bold"
                 android:textSize="@dimen/textSizeSubject"
-                android:text="Disconnect"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Device : "
                 android:textColor="@color/colorBlack"
-                android:textStyle="bold"
                 android:textSize="@dimen/textSizeSubject"
-                android:text="Device : "/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/txtDeviceDetail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Unknown"
                 android:textColor="@color/colorBlack"
-                android:textStyle="bold"
                 android:textSize="@dimen/textSizeSubject"
-                android:text="Unknown"/>
+                android:textStyle="bold" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorBlack"
                 android:layout_gravity="center_vertical"
-                android:textStyle="bold"
+                android:text="Mode : "
+                android:textColor="@color/colorBlack"
                 android:textSize="@dimen/textSizeSubject"
-                android:text="Mode : "/>
+                android:textStyle="bold" />
 
             <RadioGroup
                 android:id="@+id/rdgMode"
@@ -112,27 +111,36 @@
 
                 <RadioButton
                     android:id="@+id/rdoCardReader"
-                    android:text="Card Reader"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:text="Card Reader" />
 
                 <RadioButton
                     android:id="@+id/rdoMsr"
-                    android:text="MSR"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:text="MSR" />
 
             </RadioGroup>
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtMsrMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="MSR not used"
+            android:textColor="@color/colorBlack"
+            android:visibility="gone"/>
 
     </LinearLayout>
 
     <FrameLayout
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/linearTop"
         android:layout_above="@id/linearBottom"
+        android:layout_below="@id/linearTop"
         android:layout_centerHorizontal="true">
 
         <ImageView
@@ -140,14 +148,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:scaleType="centerInside"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btnOpenFromDeviceStorage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Open from device storage"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:text="Open from device storage" />
 
     </FrameLayout>
 
@@ -155,25 +163,25 @@
         android:id="@+id/linearBottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="16dp"
+        android:layout_alignParentBottom="true"
         android:layout_margin="8dp"
-        android:layout_alignParentBottom="true">
+        android:orientation="vertical"
+        android:paddingTop="16dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:text="Result"
-            android:textStyle="bold"
-            android:textSize="@dimen/textSizeHeader"
             android:textColor="@color/colorBlack"
-            android:layout_marginBottom="8dp"/>
+            android:textSize="@dimen/textSizeHeader"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/edtResult"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
