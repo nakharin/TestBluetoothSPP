@@ -112,16 +112,6 @@ public class Personal {
         return type;
     }
 
-    public String getAddress() {
-        String address =  this.address.replace("#", " ").substring(0, this.address.length());
-        Log.i(TAG, "Address : " + address);
-        return address;
-    }
-
-    public void setAddress(String value) {
-        address = value.trim();
-    }
-
     public String getHouseNo() {
         return address.split("#")[0].trim();
     }
@@ -153,6 +143,16 @@ public class Personal {
         String province =  provinceName.substring(0, provinceName.length());
         Log.i(TAG, "Province : " + province);
         return province;
+    }
+
+    public String getAddress() {
+        String address =  this.address.replace("#", " ").substring(0, this.address.length());
+        Log.i(TAG, "Address : " + address);
+        return address;
+    }
+
+    public void setAddress(String value) {
+        address = value.trim();
     }
 
     public void setIssueExpire(String value) {
