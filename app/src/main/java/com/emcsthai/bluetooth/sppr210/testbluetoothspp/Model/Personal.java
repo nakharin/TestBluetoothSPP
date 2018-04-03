@@ -41,8 +41,20 @@ public class Personal {
         Log.i(TAG, "PersonalInfoEN : " + personal.substring(100, 200));
     }
 
-    public String getDateOfBirth() {
+    public String getDateOfBirthAD() {
         int birthYear = Integer.valueOf(personal.substring(200, 204)) - 543;
+        String birthMonth = personal.substring(204, 206);
+        String birthDay = personal.substring(206, 208);
+
+        String dateOfBirth = birthDay + "-" + birthMonth + "-" + (String.valueOf(birthYear));
+
+        Log.i(TAG, "DateOfBirth : " + dateOfBirth);
+
+        return dateOfBirth;
+    }
+
+    public String getDateOfBirthBE() {
+        int birthYear = Integer.valueOf(personal.substring(200, 204));
         String birthMonth = personal.substring(204, 206);
         String birthDay = personal.substring(206, 208);
 
@@ -66,7 +78,7 @@ public class Personal {
     }
 
     public int getAge() {
-        String dateOfBirth = getDateOfBirth();
+        String dateOfBirth = getDateOfBirthAD();
         String date[] = dateOfBirth.split("-");
         Calendar calendar = Calendar.getInstance();
         int birthDayYear = Integer.parseInt(date[2]);

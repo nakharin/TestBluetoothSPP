@@ -231,7 +231,7 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
         message += "คำนำหน้า : " + personal.getTitleTH() + " (" + personal.getTitleEN() + ")\n";
         message += "ขื่อ-นามสกุล : " + personal.getNameTH() + " " + personal.getLastNameTH() + " (" + personal.getNameEN() + " " + personal.getLastNameEN() + ")\n";
-        message += "วันเดือนปีเกิด : " + personal.getDateOfBirth() + "\n";
+        message += "วันเดือนปีเกิด : " + personal.getDateOfBirthBE() + "\n";
         message += "เพศ : " + personal.getSexNameTH() + "\n";
         message += "อายุ : " + personal.getAge() + "\n";
         message += "บัตรประชาชน : " + personal.getCitizenId() + "\n";
