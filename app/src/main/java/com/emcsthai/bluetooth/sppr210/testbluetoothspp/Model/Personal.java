@@ -112,12 +112,6 @@ public class Personal {
         return enLastName;
     }
 
-    public String getType() {
-        String type = personal.split("#")[0].trim();
-        Log.i(TAG, "Type: ");
-        return type;
-    }
-
     public String getHouseNo() {
         return address.split("#")[0].trim();
     }
