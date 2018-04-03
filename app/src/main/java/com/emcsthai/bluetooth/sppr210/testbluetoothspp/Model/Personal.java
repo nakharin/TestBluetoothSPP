@@ -116,14 +116,23 @@ public class Personal {
         return address.split("#")[0].trim();
     }
 
+    /**
+     * Some area have data
+     */
     public String getVillageNo() {
-        return address.split("#")[1].trim();
+        return address.split("#")[1].trim().replace("หมู่ที่ ", "");
     }
 
+    /**
+     * Some area have data
+     */
     public String getLane() {
         return address.split("#")[2].trim();
     }
 
+    /**
+     * Some area have data
+     */
     public String getRoad() {
         return address.split("#")[3].trim();
     }

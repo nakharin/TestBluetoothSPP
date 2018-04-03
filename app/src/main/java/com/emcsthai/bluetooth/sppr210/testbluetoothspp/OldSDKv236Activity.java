@@ -232,8 +232,9 @@ public class OldSDKv236Activity extends AppCompatActivity {
         message += "เพศ : " + personal.getSexNameTH() + "\n";
         message += "อายุ : " + personal.getAge() + "\n";
         message += "บัตรประชาชน : " + personal.getCitizenId() + "\n";
-        message += "ตำบล : " + personal.getDistrict() + "\n";
-        message += "อำเภอ : " + personal.getSubDistrict() + "\n";
+        message += "บ้านเลขที่ : " + personal.getHouseNo() + "\n";
+        message += "ตำบล/แขวง : " + personal.getDistrict() + "\n";
+        message += "อำเภอ/เขต : " + personal.getSubDistrict() + "\n";
         message += "จังหวัด : " + personal.getProvince() + "\n";
         message += "ที่อยู่ : " + personal.getAddress();
 
