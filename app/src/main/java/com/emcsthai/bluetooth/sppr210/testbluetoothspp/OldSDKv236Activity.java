@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.bixolon.printer.BixolonPrinter;
 import com.bixolon.printer.utility.Command;
 import com.bixolon.printer.utility.Utility;
+import com.emcsthai.bluetooth.sppr210.testbluetoothspp.Model.Personal;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.EMCSUtility;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.LoadingDialogHandler;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.ThaiApdu;
@@ -83,6 +84,8 @@ public class OldSDKv236Activity extends AppCompatActivity {
     private byte[] mTrack3Data;
 
     private String msrResult = "";
+
+    private Personal personal = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,11 +204,35 @@ public class OldSDKv236Activity extends AppCompatActivity {
     private void showResult() {
 
         String message = "";
-        arrByte.remove(0);
-        for (int i = 0; i < arrByte.size(); i++) {
+        String log = "";
+        personal = new Personal();
+
+        for (int i = 1; i < arrByte.size(); i++) {
             byte[] bytes = arrByte.get(i);
-            message += i + " : " + EMCSUtility.getUTF8FromAsciiBytes(bytes) + "\n";
+            if (i == 1) {
+                personal.setCitizenId(EMCSUtility.getUTF8FromAsciiBytes(bytes));
+                log += EMCSUtility.getUTF8FromAsciiBytes(bytes) + "\n";
+            } else if (i == 2) {
+                personal.setPersonalInfo(EMCSUtility.getUTF8FromAsciiBytes(bytes));
+                log += EMCSUtility.getUTF8FromAsciiBytes(bytes) + "\n";
+            } else if (i == 3) {
+                personal.setAddress(EMCSUtility.getUTF8FromAsciiBytes(bytes));
+                log += EMCSUtility.getUTF8FromAsciiBytes(bytes);
+            }
         }
+
+        message += "คำนำหน้า : " + personal.getThPrefix() + " (" + personal.getENPrefix() + ")\n";
+        message += "ขื่อ-นามสกุล : " + personal.getTHFirstName() + " " + personal.getTHLastName() + " (" + personal.getENFirstName() + " " + personal.getENLastName() +")\n";
+        message += "วันเดือนปีเกิด : " + personal.getDateOfBirth() + "\n";
+        message += "เพศ : " + personal.getSex() + "\n";
+        message += "อายุ : " + personal.getAge() + "\n";
+        message += "บัตรประชาชน : " + personal.getCitizenId() + "\n";
+        message += "ตำบล : " + personal.getDistrict() + "\n";
+        message += "อำเภอ : " + personal.getSubDistrict() + "\n";
+        message += "จังหวัด : " + personal.getProvince() + "\n";
+        message += "ที่อยู่ : " + personal.getAddress();
+
+        Log.i("5555", "showResult : " + log);
 
         edtResult.setText(message);
     }
