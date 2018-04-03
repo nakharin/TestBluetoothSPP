@@ -478,8 +478,6 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
             if (v == btnRead) {
 
-//                bixolonPrinter.getSmartCardStatus();
-
                 arrByte.clear();
                 bixolonPrinter.powerUpSmartCard();
 
