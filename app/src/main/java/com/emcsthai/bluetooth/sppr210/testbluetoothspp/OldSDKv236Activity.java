@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bixolon.printer.BixolonPrinter;
+import com.bixolon.printer.utility.Utility;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.Model.Personal;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.EMCSUtility;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.LoadingDialogHandler;
@@ -324,12 +325,8 @@ public class OldSDKv236Activity extends AppCompatActivity {
                     return true;
 
                 case BixolonPrinter.MESSAGE_READ:
-
-                    Log.i(TAG, "handleMessage : what : " + msg.what + " ,arg1 : " + msg.arg1 + " ,arg2 : " + msg.arg2 + " , obj : " + msg.obj);
-
+                    Log.i(TAG, "handleMessage : what : " + msg.what + " ,arg1 : " + msg.arg1 + " ,arg2 : " + msg.arg2 + " , obj : " + Utility.toHexString((byte[]) msg.obj));
                     switch (msg.arg1) {
-                        case BixolonPrinter.PROCESS_SMART_CARD_STATUS:
-                            break;
                         case BixolonPrinter.PROCESS_SMART_CARD_EXCHANGE_APDU:
 
                             if (msg.arg2 == BixolonPrinter.SMART_CARD_STATUS_CODE_CARD_NOT_PRESENT) {
