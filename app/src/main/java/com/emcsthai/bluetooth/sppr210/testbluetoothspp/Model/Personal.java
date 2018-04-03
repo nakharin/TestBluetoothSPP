@@ -70,39 +70,39 @@ public class Personal {
         return age;
     }
 
-    public String getThPrefix() {
+    public String getTitleTH() {
         String thPrefix = thPersonal[0].trim();
-        Log.i(TAG, "THPrefix : " + thPrefix);
+        Log.i(TAG, "Title TH : " + thPrefix);
         return thPrefix;
     }
 
-    public String getTHFirstName() {
+    public String getNameTH() {
         String thFirstName = thPersonal[1].trim();
-        Log.i(TAG, "THFirstName : " + thFirstName);
+        Log.i(TAG, "Name TH : " + thFirstName);
         return thFirstName;
     }
 
-    public String getTHLastName() {
+    public String getLastNameTH() {
         String thLastName = thPersonal[3].trim();
-        Log.i(TAG, "THLastName : " + thLastName);
+        Log.i(TAG, "LastName TH : " + thLastName);
         return thLastName;
     }
 
-    public String getENPrefix() {
+    public String getTitleEN() {
         String enPrefix = enPersonal[0].trim();
-        Log.i(TAG, "ENPrefix : " + enPrefix);
+        Log.i(TAG, "Title EN: " + enPrefix);
         return enPrefix;
     }
 
-    public String getENFirstName() {
+    public String getNameEN() {
         String enFirstName = enPersonal[1].trim();
-        Log.i(TAG, "ENFirstName : " + enFirstName);
+        Log.i(TAG, "Name EN : " + enFirstName);
         return enFirstName;
     }
 
-    public String getENLastName() {
+    public String getLastNameEN() {
         String enLastName = enPersonal[3].trim();
-        Log.i(TAG, "ENLastName : " + enLastName);
+        Log.i(TAG, "LastName EN : " + enLastName);
         return enLastName;
     }
 

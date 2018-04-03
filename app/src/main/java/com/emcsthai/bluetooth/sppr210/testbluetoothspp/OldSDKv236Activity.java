@@ -26,8 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bixolon.printer.BixolonPrinter;
-import com.bixolon.printer.utility.Command;
-import com.bixolon.printer.utility.Utility;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.Model.Personal;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.EMCSUtility;
 import com.emcsthai.bluetooth.sppr210.testbluetoothspp.MyUtility.LoadingDialogHandler;
@@ -221,8 +219,8 @@ public class OldSDKv236Activity extends AppCompatActivity {
             }
         }
 
-        message += "คำนำหน้า : " + personal.getThPrefix() + " (" + personal.getENPrefix() + ")\n";
-        message += "ขื่อ-นามสกุล : " + personal.getTHFirstName() + " " + personal.getTHLastName() + " (" + personal.getENFirstName() + " " + personal.getENLastName() +")\n";
+        message += "คำนำหน้า : " + personal.getTitleTH() + " (" + personal.getTitleEN() + ")\n";
+        message += "ขื่อ-นามสกุล : " + personal.getNameTH() + " " + personal.getLastNameTH() + " (" + personal.getNameEN() + " " + personal.getLastNameEN() +")\n";
         message += "วันเดือนปีเกิด : " + personal.getDateOfBirth() + "\n";
         message += "เพศ : " + personal.getSex() + "\n";
         message += "อายุ : " + personal.getAge() + "\n";
