@@ -53,10 +53,16 @@ public class Personal {
         return dateOfBirth;
     }
 
-    public String getSex() {
-        String sex = personal.substring(208, 209);
-        Log.i(TAG, "Sex : " + sex);
-        return sex;
+    public int getSexCode() {
+        String sexCode = personal.substring(208, 209);
+        Log.i(TAG, "SexCode : " + sexCode);
+        return Integer.parseInt(sexCode);
+    }
+
+    public String getSexNameTH() {
+        String sexNameTH = (getSexCode() == 1) ? "ชาย" : "หญิง";
+        Log.i(TAG, "SexNameTH : " + sexNameTH);
+        return sexNameTH;
     }
 
     public int getAge() {
