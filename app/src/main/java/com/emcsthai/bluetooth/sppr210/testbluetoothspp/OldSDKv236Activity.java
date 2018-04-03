@@ -42,6 +42,8 @@ import app.akexorcist.bluetotohspp.library.BluetoothState;
 
 public class OldSDKv236Activity extends AppCompatActivity {
 
+    private static final String TAG = "OldSDKv236Activity";
+
     private static final int REQUEST_CODE_ACTION_PICK = 2000;
 
     private BluetoothSPP bluetoothSPP;
@@ -201,6 +203,10 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
     private void showResult() {
 
+        index = 0;
+        LoadingDialogHandler.getInstance().closeLoadingDialog();
+        bixolonPrinter.powerDownSmartCard();
+
         String message = "";
         String log = "";
         personal = new Personal();
@@ -230,9 +236,11 @@ public class OldSDKv236Activity extends AppCompatActivity {
         message += "จังหวัด : " + personal.getProvince() + "\n";
         message += "ที่อยู่ : " + personal.getAddress();
 
-        Log.i("5555", "showResult : " + log);
+        Log.i(TAG, "showResult : " + log);
 
         edtResult.setText(message);
+
+
     }
 
     @Override
@@ -317,8 +325,19 @@ public class OldSDKv236Activity extends AppCompatActivity {
 
                 case BixolonPrinter.MESSAGE_READ:
 
+                    Log.i(TAG, "handleMessage : what : " + msg.what + " ,arg1 : " + msg.arg1 + " ,arg2 : " + msg.arg2 + " , obj : " + msg.obj);
+
                     switch (msg.arg1) {
+                        case BixolonPrinter.PROCESS_SMART_CARD_STATUS:
+                            break;
                         case BixolonPrinter.PROCESS_SMART_CARD_EXCHANGE_APDU:
+
+                            if (msg.arg2 == BixolonPrinter.SMART_CARD_STATUS_CODE_CARD_NOT_PRESENT) {
+                                LoadingDialogHandler.getInstance().closeLoadingDialog();
+                                Toast.makeText(OldSDKv236Activity.this, "Please insert card.", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
+
                             byte[] b = (byte[]) msg.obj;
                             if (b != null) {
                                 if (b.length > 5) {
@@ -329,21 +348,15 @@ public class OldSDKv236Activity extends AppCompatActivity {
                                     bixolonPrinter.exchangeApdu(apduCommand.get(index));
 
                                 } else {
-                                    index = 0;
-                                    LoadingDialogHandler.getInstance().closeLoadingDialog();
-                                    Toast.makeText(OldSDKv236Activity.this, "Read Completed", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(OldSDKv236Activity.this, "Read Completed.", Toast.LENGTH_SHORT).show();
                                     // Method from this class
                                     showResult();
-                                    bixolonPrinter.powerDownSmartCard();
                                 }
 
                             } else {
-                                index = 0;
-                                LoadingDialogHandler.getInstance().closeLoadingDialog();
-                                Toast.makeText(OldSDKv236Activity.this, "Read Failed", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(OldSDKv236Activity.this, "Read Failed.", Toast.LENGTH_SHORT).show();
                                 // Method from this class
                                 showResult();
-                                bixolonPrinter.powerDownSmartCard();
                             }
                             break;
 
@@ -467,6 +480,8 @@ public class OldSDKv236Activity extends AppCompatActivity {
             }
 
             if (v == btnRead) {
+
+//                bixolonPrinter.getSmartCardStatus();
 
                 arrByte.clear();
                 bixolonPrinter.powerUpSmartCard();
